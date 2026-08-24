@@ -62,7 +62,7 @@ loadDotEnv();
 const github = require("./github");
 const medium = require("./medium");
 const ollama = require("./ollama");
-const { generateConfig } = require("../scripts/generate-config");
+const { generateConfig, generateIndexHtml } = require("../scripts/generate-config");
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const AGENT_BRANCH = "agent/auto-update";
@@ -312,7 +312,8 @@ async function main() {
   log("poll", `updated ${path.relative(ROOT, DATA_FILE)}`);
 
   generateConfig();
-  log("poll", "regenerated config.js");
+  generateIndexHtml();
+  log("poll", "regenerated config.js and index.html");
 
   state.seenRepos.push(...newRepos.map((r) => r.full_name));
   state.seenPosts.push(...mappedPosts.map((p) => p.url));

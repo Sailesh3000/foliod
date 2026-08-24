@@ -1,6 +1,6 @@
 /**
  * Medium RSS feed fetching + minimal dependency-free XML parsing.
- * Feed: https://medium.com/feed/@saileshhedu
+ * Feed: https://medium.com/feed/@<MEDIUM_USERNAME> (see .env.example)
  *
  * CLI test hook:
  *   node agent/medium.js                    -> fetches live feed, prints parsed posts
@@ -9,10 +9,14 @@
 
 const fs = require("fs");
 
-const MEDIUM_USERNAME = process.env.MEDIUM_USERNAME || "saileshhedu";
-const DEFAULT_FEED = process.env.MEDIUM_FEED_URL || `https://medium.com/feed/@${MEDIUM_USERNAME}`;
+const MEDIUM_USERNAME = process.env.MEDIUM_USERNAME || null;
+const DEFAULT_FEED =
+  process.env.MEDIUM_FEED_URL || (MEDIUM_USERNAME ? `https://medium.com/feed/@${MEDIUM_USERNAME}` : null);
 
 async function fetchFeed(url = DEFAULT_FEED) {
+  if (!url) {
+    throw new Error("MEDIUM_USERNAME or MEDIUM_FEED_URL is not set — add one to .env (see .env.example)");
+  }
   const res = await fetch(url, {
     headers: { "User-Agent": "portfolio-auto-agent" },
     signal: AbortSignal.timeout(30000),

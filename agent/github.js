@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 
 const API = "https://api.github.com";
-const USERNAME = process.env.GITHUB_USERNAME || "Sailesh3000";
+const USERNAME = process.env.GITHUB_USERNAME || null;
 
 function headers(token) {
   const h = {
@@ -32,6 +32,9 @@ async function ghFetch(url, token) {
 
 /** All public repos for the user, paginated, newest first. */
 async function fetchRepos({ username = USERNAME, token } = {}) {
+  if (!username) {
+    throw new Error("GITHUB_USERNAME is not set — add it to .env (see .env.example)");
+  }
   const repos = [];
   for (let page = 1; page <= 10; page++) {
     const res = await ghFetch(

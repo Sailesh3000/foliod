@@ -1,6 +1,6 @@
 # Foliod
 
-Chandra Sailesh's self-curating portfolio: a config-driven static site (plain
+A self-curating portfolio: a config-driven static site (plain
 HTML/CSS/vanilla JS, zero build) plus a local **Ollama-powered agent** that
 watches GitHub and Medium, drafts portfolio entries for new repos/posts, updates
 the site data, and opens a PR for review — merging it is what triggers a
@@ -123,15 +123,16 @@ node agent/poll.js --dry-run
 3. Configure secrets and identity:
    ```bash
    cp .env.example .env    # then edit:
-   # GITHUB_USERNAME  the GitHub account the agent polls (defaults to Sailesh3000)
+   # GITHUB_USERNAME  required — the GitHub account the agent polls
    # GITHUB_TOKEN     optional — raises API rate limit 60 -> 5000/h
-   # MEDIUM_USERNAME  the Medium handle the agent polls (defaults to saileshhedu)
+   # MEDIUM_USERNAME  required (or MEDIUM_FEED_URL) — the Medium handle the agent polls
    # OLLAMA_MODEL     default qwen3:8b
    # OLLAMA_HOST      default http://localhost:11434
    # PUSH_MODE        "pr" (default, opens a PR for review) or "direct" (old push behavior)
    ```
-   If you skip this file entirely the agent still runs — it just polls the
-   defaults baked into `agent/github.js` / `agent/medium.js`.
+   `GITHUB_USERNAME` and `MEDIUM_USERNAME`/`MEDIUM_FEED_URL` are required — the
+   agent has no built-in identity and fails with a clear error if either is
+   missing.
 4. Create a GitHub repo for this folder and push it (first deploy) — `gh` (already
    installed for PR mode) can do this in one step:
    ```bash

@@ -11,7 +11,7 @@ const CONFIG = {
     "subtitle": "AI Engineer & Developer",
     "bio": "I build intelligent systems at the intersection of AI, machine learning, and modern web engineering — focused on shipping products that feel seamless and think deeply.",
     "contact": {
-      "email": "saileshhedu@gmail.com",
+      "email": "chandrasailesh30@gmail.com",
       "phone": "+91 9121450673"
     },
     "socials": [
