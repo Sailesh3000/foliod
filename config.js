@@ -102,7 +102,7 @@ const CONFIG = {
   "projects": [
     {
       "name": "pinch",
-      "category": "Mobile / AI",
+      "category": "Mobile / AI · Ongoing",
       "description": "Privacy-first Android expense tracker using on-device AI to extract transactions from bank/UPI notifications without data leakage. Implements a tiered LLM pipeline for deterministic financial insights with no cloud dependency.",
       "tech": [
         "Kotlin",
@@ -114,7 +114,7 @@ const CONFIG = {
         "MediaPipe",
         "Regex"
       ],
-      "link": "https://api.github.com/repos/Sailesh3000/pinch",
+      "link": "https://github.com/Sailesh3000/pinch",
       "highlight": "On-device AI processes payments without data leakage",
       "accentColor": "#a78bfa",
       "icon": "sparkle",
@@ -133,7 +133,7 @@ const CONFIG = {
         "React",
         "Mermaid"
       ],
-      "link": "https://api.github.com/repos/Sailesh3000/Snag",
+      "link": "https://github.com/Sailesh3000/Snag",
       "highlight": "Autofills job forms with AI-generated answers using local or cloud LLMs",
       "accentColor": "#34d399",
       "icon": "sparkle",
