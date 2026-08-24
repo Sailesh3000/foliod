@@ -775,6 +775,14 @@ body::before {
   gap: 1.4rem;
 }
 
+.card[hidden] {
+  /* .card's own `display: flex` ties in specificity with the browser's
+     built-in [hidden] rule, and same-specificity author CSS beats the
+     user-agent stylesheet — so [hidden] alone was never actually hiding
+     filtered-out cards. This selector is more specific and wins for real. */
+  display: none;
+}
+
 .card {
   --accent: var(--signal);
   position: relative;
