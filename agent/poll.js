@@ -264,6 +264,7 @@ async function main() {
 
   // ---- draft (in memory; nothing written until all drafting settles) -------
   const draftedProjects = [];
+  const draftedRepoNames = [];
   let accentIndex = 0;
 
   for (const repo of newRepos) {
@@ -275,8 +276,12 @@ async function main() {
         { host: ollamaHost, model: ollamaModel, accentIndex: accentIndex++ }
       );
       draftedProjects.push(entry);
+      draftedRepoNames.push(repo.full_name);
       log("ollama", `drafted "${entry.name}" [${entry.category}] (${entry.tech.length} tech chips, group=${entry.filterGroup})`);
     } catch (err) {
+      // Deliberately NOT marked seen: a repo that fails to draft (e.g. a
+      // transient Ollama crash) should get another chance on the next run,
+      // not be silently blacklisted forever.
       log("ollama", `SKIP ${repo.full_name}: ${err.message}`);
     }
   }
@@ -315,7 +320,7 @@ async function main() {
   generateIndexHtml();
   log("poll", "regenerated config.js and index.html");
 
-  state.seenRepos.push(...newRepos.map((r) => r.full_name));
+  state.seenRepos.push(...draftedRepoNames);
   state.seenPosts.push(...mappedPosts.map((p) => p.url));
   fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + "\n", "utf8");
   log("poll", `updated agent/state.json (${state.seenRepos.length} repos, ${state.seenPosts.length} posts seen)`);

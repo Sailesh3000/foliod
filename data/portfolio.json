@@ -7,10 +7,34 @@
   "skills": {
     "label": "// stack",
     "rows": [
-      ["Python", "React.js", "FastAPI", "TypeScript", "Node.js"],
-      ["RAG", "LLMs", "Agentic AI", "LangGraph", "Strands"],
-      ["Qdrant", "TensorFlow", "Docker", "AWS", "MongoDB"],
-      ["NLP", "mem0", "Scikit-learn", "FastMCP", "Git"]
+      [
+        "Python",
+        "React.js",
+        "FastAPI",
+        "TypeScript",
+        "Node.js"
+      ],
+      [
+        "RAG",
+        "LLMs",
+        "Agentic AI",
+        "LangGraph",
+        "Strands"
+      ],
+      [
+        "Qdrant",
+        "TensorFlow",
+        "Docker",
+        "AWS",
+        "MongoDB"
+      ],
+      [
+        "NLP",
+        "mem0",
+        "Scikit-learn",
+        "FastMCP",
+        "Git"
+      ]
     ]
   },
   "hero": {
@@ -74,6 +98,45 @@
     }
   ],
   "projects": [
+    {
+      "name": "pinch",
+      "category": "Mobile / AI · Ongoing",
+      "description": "Privacy-first Android expense tracker using on-device AI to extract transactions from bank/UPI notifications without data leakage. Implements a tiered LLM pipeline for deterministic financial insights with no cloud dependency.",
+      "tech": [
+        "Kotlin",
+        "Jetpack Compose",
+        "NotificationListenerService",
+        "on-device LLMs",
+        "SQLite",
+        "WorkManager",
+        "MediaPipe",
+        "Regex"
+      ],
+      "link": "https://github.com/Sailesh3000/pinch",
+      "highlight": "On-device AI processes payments without data leakage",
+      "accentColor": "#a78bfa",
+      "icon": "sparkle",
+      "filterGroup": "ai"
+    },
+    {
+      "name": "Snag",
+      "category": "AI Tools / Web Extensions",
+      "description": "AI-powered job application assistant with Chrome extension and FastAPI backend that auto-fills job forms using LLM-generated answers. Combines DOM extraction, semantic memory, and real-time WebSocket communication for personalized application support.",
+      "tech": [
+        "TypeScript",
+        "FastAPI",
+        "WebSocket",
+        "SQLite",
+        "LLM Providers",
+        "React",
+        "Mermaid"
+      ],
+      "link": "https://github.com/Sailesh3000/Snag",
+      "highlight": "Autofills job forms with AI-generated answers using local or cloud LLMs",
+      "accentColor": "#34d399",
+      "icon": "sparkle",
+      "filterGroup": "ai"
+    },
     {
       "name": "Knowledge Detective",
       "category": "Semantic Graph & RAG",

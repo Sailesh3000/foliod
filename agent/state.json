@@ -1,8 +1,5 @@
 {
   "seenRepos": [
-    "Sailesh3000/pinch",
-    "Sailesh3000/OpenRoute",
-    "Sailesh3000/Snag",
     "Sailesh3000/new_test",
     "Sailesh3000/knowledge-detective",
     "Sailesh3000/Mini-Answer-Evaluator",
@@ -45,7 +42,9 @@
     "Sailesh3000/SIHhomepage",
     "Sailesh3000/Results-summary-component",
     "Sailesh3000/InteractiveRating",
-    "Sailesh3000/foliod"
+    "Sailesh3000/foliod",
+    "Sailesh3000/pinch",
+    "Sailesh3000/Snag"
   ],
   "seenPosts": [
     "https://medium.com/@saileshhedu/never-lose-the-right-chunk-how-hybrid-search-improves-recall-in-rag-systems-10adc2693307",
