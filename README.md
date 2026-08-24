@@ -1,9 +1,10 @@
-# Chandra Sailesh — Portfolio + Auto-Update Agent
+# Foliod
 
-Config-driven static portfolio (plain HTML/CSS/vanilla JS, zero build) plus a local
-**Ollama-powered agent** that watches GitHub and Medium, drafts portfolio entries for
-new repos/posts, updates the site data, and pushes to git so Vercel/Netlify redeploys
-automatically.
+Chandra Sailesh's self-curating portfolio: a config-driven static site (plain
+HTML/CSS/vanilla JS, zero build) plus a local **Ollama-powered agent** that
+watches GitHub and Medium, drafts portfolio entries for new repos/posts, updates
+the site data, and opens a PR for review — merging it is what triggers a
+Vercel/Netlify redeploy.
 
 ```
 portfolio_agent/
@@ -24,6 +25,30 @@ portfolio_agent/
 ├── vercel.json                 static hosting config (no build step)
 └── package.json                zero runtime dependencies (Node >= 18)
 ```
+
+## Using this as your own portfolio (template setup)
+
+This repo is not hardcoded to one person — GitHub/Medium sources are read from
+env vars, and all content comes from one JSON file. To make it yours:
+
+1. **Fork or copy this repo.**
+2. **Replace your content** in `data/portfolio.json` — `meta`, `hero` (name, bio,
+   contact, socials), `experience`, `projects`, `research.papers` (leave `[]` to
+   keep the section hidden), `writing.featured`, `footer`. Then:
+   ```bash
+   node scripts/generate-config.js
+   ```
+3. **Point the agent at your own accounts** — copy `.env.example` to `.env` and set:
+   ```bash
+   GITHUB_USERNAME=your-github-handle
+   MEDIUM_USERNAME=your-medium-handle       # or MEDIUM_FEED_URL for a custom domain
+   ```
+   Nothing else in `agent/` needs editing — `github.js` and `medium.js` both read
+   these at startup.
+4. **Reset the dedup memory** so the agent doesn't skip your existing repos/posts
+   on the first run — either delete `agent/state.json` or empty its two arrays.
+   Run `node agent/poll.js --dry-run` once to confirm it now sees your real repos.
+5. Follow **One-time setup** below (Ollama, git remote, Vercel/Netlify import).
 
 ## Editing site content
 
@@ -59,18 +84,27 @@ once at least one paper exists (it is hidden while `papers` is empty).
 `node agent/poll.js` runs this all-or-nothing pipeline:
 
 1. Load `agent/state.json` (dedup memory).
-2. Fetch public non-fork repos for `@Sailesh3000`; keep unseen ones.
-3. Fetch the Medium RSS feed (`@saileshhedu`); keep unseen post URLs.
-4. Nothing new → exit (no commit, no deploy).
-5. Each new repo: README excerpt → local Ollama → validated JSON project entry.
+2. **PR mode only:** if an agent PR is already open, stop — no duplicate work
+   until it's merged or closed.
+3. Fetch public non-fork repos for the configured GitHub user; keep unseen ones.
+4. Fetch the Medium RSS feed; keep unseen post URLs.
+5. Nothing new → exit (no commit, no deploy).
+6. Each new repo: README excerpt → local Ollama → validated JSON project entry.
    Failures are logged and skipped, never pushed malformed.
-6. Each new Medium post: `{title, date, url}` straight from feed metadata.
-7. Prepend entries into `data/portfolio.json`, regenerate `config.js`.
-8. Update `state.json`.
-9. `git add -A && git commit -m "chore: auto-add ..." && git push` → redeploy.
-10. Any error before step 9 aborts with no partial commits.
+7. Each new Medium post: `{title, date, url}` straight from feed metadata.
+8. Prepend entries into `data/portfolio.json`, regenerate `config.js`.
+9. Update `state.json`.
+10. Publish, per `PUSH_MODE`:
+    - **`pr`** (default): commit on branch `agent/auto-update`, push it, open a
+      PR via `gh` against the branch you ran the agent from. That base branch is
+      left untouched — nothing redeploys until you review and merge. Merging is
+      also what applies the new `state.json`, so an unmerged PR means the same
+      items get proposed again next run.
+    - **`direct`**: commit and push straight to the current branch (old
+      behavior) — set `PUSH_MODE=direct` if you'd rather skip review.
+11. Any error before step 10 aborts with no partial commits.
 
-Preview without writing/pushing anything:
+Preview without writing/pushing/opening anything:
 
 ```bash
 node agent/poll.js --dry-run
@@ -78,23 +112,35 @@ node agent/poll.js --dry-run
 
 ## One-time setup
 
-1. **Node >= 18** and **git** installed.
+1. **Node >= 18**, **git**, and the **[GitHub CLI](https://cli.github.com/)** (`gh`)
+   installed — `gh` is required for the default PR-first publish mode. Authenticate
+   once: `gh auth login`.
 2. Install Ollama and pull a model:
    ```bash
    ollama pull qwen3:8b
    curl http://localhost:11434/api/tags   # confirm it is up
    ```
-3. Configure secrets (optional but recommended):
+3. Configure secrets and identity:
    ```bash
    cp .env.example .env    # then edit:
-   # GITHUB_TOKEN   optional — raises API rate limit 60 -> 5000/h
-   # OLLAMA_MODEL   default qwen3:8b
-   # OLLAMA_HOST    default http://localhost:11434
+   # GITHUB_USERNAME  the GitHub account the agent polls (defaults to Sailesh3000)
+   # GITHUB_TOKEN     optional — raises API rate limit 60 -> 5000/h
+   # MEDIUM_USERNAME  the Medium handle the agent polls (defaults to saileshhedu)
+   # OLLAMA_MODEL     default qwen3:8b
+   # OLLAMA_HOST      default http://localhost:11434
+   # PUSH_MODE        "pr" (default, opens a PR for review) or "direct" (old push behavior)
    ```
-4. Create a GitHub repo for this folder and push it (first deploy):
+   If you skip this file entirely the agent still runs — it just polls the
+   defaults baked into `agent/github.js` / `agent/medium.js`.
+4. Create a GitHub repo for this folder and push it (first deploy) — `gh` (already
+   installed for PR mode) can do this in one step:
    ```bash
    git init && git add -A && git commit -m "feat: initial portfolio + agent"
-   git remote add origin git@github.com:Sailesh3000/<repo>.git
+   gh repo create foliod --public --source=. --remote=origin --push
+   ```
+   or manually:
+   ```bash
+   git remote add origin git@github.com:<you>/foliod.git
    git push -u origin main
    ```
 5. Import the repo on [Vercel](https://vercel.com/new) (or Netlify): framework preset
@@ -130,8 +176,32 @@ schtasks /Delete /TN "Portfolio Poller"  :: remove
 | `ollama` module errors | Is Ollama running? `curl http://localhost:11434/api/tags` |
 | model not found | `OLLAMA_MODEL` must match an installed model (`ollama list`) |
 | GitHub 403/429 | Add `GITHUB_TOKEN` to `.env` |
+| `gh: command not found` / PR step fails | Install the [GitHub CLI](https://cli.github.com/) and run `gh auth login`, or set `PUSH_MODE=direct` to skip PRs entirely |
+| agent says "PR already open, skipping" every run | Merge or close the open `agent/auto-update` PR — that's what unblocks the next run |
 | push fails in scheduled runs | Run `git push` manually once; check remote/auth |
 | section missing on site | Did you rerun `node scripts/generate-config.js` after editing JSON? |
+
+## Ideas for extending the agent
+
+Not built, but natural next steps on this architecture:
+
+- **Self-critique pass** — a second Ollama call that fact-checks the drafted
+  `description`/`tech` against the raw README before accepting it, catching
+  invented claims the first pass made up.
+- **Dead-link sweep** — before each push, `HEAD`-request every `link`/`url` in
+  `data/portfolio.json` and warn (or block) on 404s, including Medium posts that
+  get unpublished.
+- **Stale-tech nudges** — periodically diff each project's `tech[]` against
+  the repo's *current* `package.json`/`requirements.txt`, flagging entries that
+  drifted out of sync with the real stack.
+- **Star/activity-weighted ordering** — sort `projects[]` by GitHub stars or
+  last-push recency instead of pure prepend-newest-first.
+- **Run notification** — a webhook/email/Discord ping summarizing what a given
+  `poll.js` run added, so you get an audit trail even though the push already
+  happened.
+- **GitHub Actions runner option** — document a self-hosted Actions runner
+  variant of the scheduling step for anyone who'd rather not depend on their
+  own machine being awake (still needs Ollama reachable from that runner).
 
 ## Manual verification checklist
 

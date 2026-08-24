@@ -9,7 +9,8 @@
 
 const fs = require("fs");
 
-const DEFAULT_FEED = "https://medium.com/feed/@saileshhedu";
+const MEDIUM_USERNAME = process.env.MEDIUM_USERNAME || "saileshhedu";
+const DEFAULT_FEED = process.env.MEDIUM_FEED_URL || `https://medium.com/feed/@${MEDIUM_USERNAME}`;
 
 async function fetchFeed(url = DEFAULT_FEED) {
   const res = await fetch(url, {

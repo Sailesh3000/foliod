@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 
 const API = "https://api.github.com";
-const USERNAME = "Sailesh3000";
+const USERNAME = process.env.GITHUB_USERNAME || "Sailesh3000";
 
 function headers(token) {
   const h = {

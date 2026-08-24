@@ -2,21 +2,29 @@
 /**
  * Portfolio auto-update agent.
  *
- * Pipeline (all-or-nothing: git commit/push happens only after every step succeeds):
+ * Pipeline (all-or-nothing: git/gh steps happen only after every prior step succeeds):
  *   1. load agent/state.json (seen repos / seen Medium posts)
- *   2. GitHub: new public non-fork repos for Sailesh3000
- *   3. Medium: new posts from the RSS feed
- *   4. nothing new -> exit silently
- *   5. draft each new repo as a portfolio entry via local Ollama (skipped + logged on failure)
- *   6. map each new Medium post straight from feed metadata
- *   7. merge into data/portfolio.json (prepend)
- *   8. regenerate config.js via scripts/generate-config.js
- *   9. save agent/state.json
- *  10. git add -A && commit && push  <- triggers Vercel/Netlify redeploy
+ *   2. PR mode only: if an agent PR is already open, stop (avoid duplicate work)
+ *   3. GitHub: new public non-fork repos for the configured username
+ *   4. Medium: new posts from the RSS feed
+ *   5. nothing new -> exit silently
+ *   6. draft each new repo as a portfolio entry via local Ollama (skipped + logged on failure)
+ *   7. map each new Medium post straight from feed metadata
+ *   8. merge into data/portfolio.json (prepend)
+ *   9. regenerate config.js via scripts/generate-config.js
+ *  10. save agent/state.json
+ *  11. publish, per PUSH_MODE (default "pr"):
+ *        pr     - commit on a dedicated branch, push it, open a PR via `gh` for
+ *                 review. Nothing lands on the base branch (so nothing redeploys)
+ *                 until a human merges it. Requires the `gh` CLI, authenticated,
+ *                 against a GitHub remote.
+ *        direct - commit and push straight to the current branch, same as before.
  *
  * Usage:
  *   node agent/poll.js            real run
  *   node agent/poll.js --dry-run  detect + draft + log only, writes nothing
+ *
+ * PUSH_MODE=direct node agent/poll.js   to bypass PR review and push directly
  */
 
 const fs = require("fs");
@@ -29,11 +37,6 @@ const execFileAsync = promisify(execFile);
 const ROOT = path.resolve(__dirname, "..");
 const DATA_FILE = path.join(ROOT, "data", "portfolio.json");
 const STATE_FILE = path.join(__dirname, "state.json");
-
-const github = require("./github");
-const medium = require("./medium");
-const ollama = require("./ollama");
-const { generateConfig } = require("../scripts/generate-config");
 
 // ---------------------------------------------------------------- env & utils
 
@@ -52,7 +55,20 @@ function loadDotEnv() {
   }
 }
 
+// Load .env BEFORE requiring github/medium — their USERNAME/feed defaults are
+// read from process.env at module-load time.
+loadDotEnv();
+
+const github = require("./github");
+const medium = require("./medium");
+const ollama = require("./ollama");
+const { generateConfig } = require("../scripts/generate-config");
+
 const DRY_RUN = process.argv.includes("--dry-run");
+const AGENT_BRANCH = "agent/auto-update";
+const PUSH_MODE = ["pr", "direct"].includes((process.env.PUSH_MODE || "").toLowerCase())
+  ? process.env.PUSH_MODE.toLowerCase()
+  : "pr";
 
 function log(tag, msg) {
   console.log(`[${new Date().toISOString()}] [${tag}] ${msg}`);
@@ -78,6 +94,30 @@ async function git(cwd, args) {
   return stdout.trim();
 }
 
+async function gh(args) {
+  const { stdout } = await execFileAsync("gh", args, { cwd: ROOT, windowsHide: true });
+  return stdout.trim();
+}
+
+/** Returns the open agent PR ({ number, url }) if one exists, else null. */
+async function findOpenAgentPR() {
+  try {
+    const out = await gh(["pr", "list", "--head", AGENT_BRANCH, "--state", "open", "--json", "number,url"]);
+    const list = JSON.parse(out || "[]");
+    return list[0] || null;
+  } catch (err) {
+    log("gh", `could not check for an existing PR (${err.message}) — proceeding anyway`);
+    return null;
+  }
+}
+
+function commitMessage(counts) {
+  const parts = [];
+  if (counts.projects) parts.push(`${counts.projects} project${counts.projects === 1 ? "" : "s"}`);
+  if (counts.posts) parts.push(`${counts.posts} post${counts.posts === 1 ? "" : "s"}`);
+  return { parts, message: `chore: auto-add ${parts.join(", ")}` };
+}
+
 async function gitCommitAndPush(counts) {
   const inside = await git(ROOT, ["rev-parse", "--is-inside-work-tree"]).catch(() => "false");
   if (inside !== "true") {
@@ -92,10 +132,7 @@ async function gitCommitAndPush(counts) {
     return;
   }
 
-  const parts = [];
-  if (counts.projects) parts.push(`${counts.projects} project${counts.projects === 1 ? "" : "s"}`);
-  if (counts.posts) parts.push(`${counts.posts} post${counts.posts === 1 ? "" : "s"}`);
-  const message = `chore: auto-add ${parts.join(", ")}`;
+  const { message } = commitMessage(counts);
 
   await git(ROOT, ["commit", "-m", message]);
   log("git", `committed: ${message}`);
@@ -110,6 +147,77 @@ async function gitCommitAndPush(counts) {
   }
 }
 
+/**
+ * PR-first publish: commit on AGENT_BRANCH, push it, open a PR against the
+ * branch the agent was run from. The base branch is left untouched — nothing
+ * redeploys until a human merges the PR. Requires `gh` (authenticated).
+ */
+async function gitCommitAndPR(counts) {
+  const baseBranch = await git(ROOT, ["rev-parse", "--abbrev-ref", "HEAD"]);
+  if (baseBranch === AGENT_BRANCH) {
+    throw new Error(
+      `currently checked out on ${AGENT_BRANCH} itself — run the agent from your base branch (e.g. main)`
+    );
+  }
+
+  await git(ROOT, ["add", "-A"]);
+  const status = await git(ROOT, ["status", "--porcelain"]);
+  if (!status) {
+    log("git", "nothing to commit (unexpected — skipping)");
+    return;
+  }
+
+  const { parts, message } = commitMessage(counts);
+
+  await git(ROOT, ["checkout", "-B", AGENT_BRANCH]);
+  await git(ROOT, ["commit", "-m", message]);
+  log("git", `committed on ${AGENT_BRANCH}: ${message}`);
+
+  try {
+    await git(ROOT, ["push", "-u", "origin", AGENT_BRANCH, "--force-with-lease"]);
+  } catch (err) {
+    await git(ROOT, ["checkout", baseBranch]).catch(() => {});
+    throw new Error(
+      `commit succeeded but push failed (${String(err.stderr || err.message).trim().slice(0, 200)}). ` +
+        `${AGENT_BRANCH} has the commit locally — push manually or rerun.`
+    );
+  }
+
+  await git(ROOT, ["checkout", baseBranch]);
+  log("git", `pushed ${AGENT_BRANCH}; switched back to ${baseBranch} (base branch left untouched until merge)`);
+
+  const body = [
+    "Auto-drafted by the local Ollama portfolio agent.",
+    "",
+    `- ${parts.join("\n- ")}`,
+    "",
+    "Review the diff — especially Ollama-drafted project descriptions — before merging.",
+    "Merging is what applies the new dedup state (`agent/state.json`); an unmerged PR",
+    "means the same repos/posts get proposed again on the next scheduled run.",
+  ].join("\n");
+
+  try {
+    const url = await gh([
+      "pr",
+      "create",
+      "--head",
+      AGENT_BRANCH,
+      "--base",
+      baseBranch,
+      "--title",
+      message,
+      "--body",
+      body,
+    ]);
+    log("gh", `opened PR: ${url}`);
+  } catch (err) {
+    log(
+      "gh",
+      `push succeeded but PR creation failed (${err.message}). Open it manually: gh pr create --head ${AGENT_BRANCH} --base ${baseBranch}`
+    );
+  }
+}
+
 // ---------------------------------------------------------------- main
 
 async function main() {
@@ -119,6 +227,13 @@ async function main() {
     const inside = await git(ROOT, ["rev-parse", "--is-inside-work-tree"]).catch(() => "false");
     if (inside !== "true") {
       fail("not a git work tree — init the repo (and add a remote) before running for real");
+    }
+    if (PUSH_MODE === "pr") {
+      const openPR = await findOpenAgentPR();
+      if (openPR) {
+        log("poll", `agent PR #${openPR.number} already open (${openPR.url}) — merge or close it before the next run; skipping`);
+        return;
+      }
     }
   }
 
@@ -181,7 +296,7 @@ async function main() {
     }
     log("dry-run", `would prepend ${mappedPosts.length} post(s):`);
     for (const p of mappedPosts) log("dry-run", `  post -> [${p.date}] ${p.title}`);
-    log("dry-run", "would regenerate config.js, update state.json, then git commit + push");
+    log("dry-run", `would regenerate config.js, update state.json, then publish via PUSH_MODE=${PUSH_MODE}`);
     return;
   }
 
@@ -205,7 +320,8 @@ async function main() {
   log("poll", `updated agent/state.json (${state.seenRepos.length} repos, ${state.seenPosts.length} posts seen)`);
 
   // ---- publish -------------------------------------------------------------
-  await gitCommitAndPush({
+  const publish = PUSH_MODE === "direct" ? gitCommitAndPush : gitCommitAndPR;
+  await publish({
     projects: draftedProjects.length,
     posts: mappedPosts.length,
   });
