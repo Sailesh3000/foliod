@@ -6,6 +6,39 @@ const CONFIG = {
     "description": "Personal portfolio of Chandra Sailesh — AI Engineer building intelligent systems, ML pipelines, and seamless web experiences.",
     "keywords": "AI Engineer, Machine Learning, Full Stack Developer, Portfolio"
   },
+  "skills": {
+    "label": "// stack",
+    "rows": [
+      [
+        "Python",
+        "React.js",
+        "FastAPI",
+        "TypeScript",
+        "Node.js"
+      ],
+      [
+        "RAG",
+        "LLMs",
+        "Agentic AI",
+        "LangGraph",
+        "Strands"
+      ],
+      [
+        "Qdrant",
+        "TensorFlow",
+        "Docker",
+        "AWS",
+        "MongoDB"
+      ],
+      [
+        "NLP",
+        "mem0",
+        "Scikit-learn",
+        "FastMCP",
+        "Git"
+      ]
+    ]
+  },
   "hero": {
     "name": "Chandra Sailesh",
     "subtitle": "AI Engineer & Developer",
@@ -150,9 +183,32 @@ const CONFIG = {
     }
   ],
   "research": {
-    "heading": "Research",
-    "description": "Published and preprint work.",
-    "papers": []
+    "heading": "Reading",
+    "description": "Papers shaping how I think about AI systems — not my own work, just what I'm studying.",
+    "papers": [
+      {
+        "name": "GEPA: Reflective Prompt Evolution Can Outperform Reinforcement Learning",
+        "authors": "Agrawal, Tan, Soylu, et al. — UC Berkeley, Stanford, Databricks, MIT",
+        "category": "Prompt Optimization",
+        "venue": "ICLR 2026 (Oral)",
+        "date": "2026",
+        "url": "https://arxiv.org/abs/2507.19457",
+        "abstract": "A reflective prompt optimizer that uses natural-language trajectory reflection instead of RL rollouts — beats GRPO by up to 20% while using up to 35x fewer rollouts, and outperforms MIPROv2 across six tasks.",
+        "accentColor": "#f472b6",
+        "filterGroup": "ai"
+      },
+      {
+        "name": "Leave it to the Specialist: Repair Sparse LLMs with Sparse Fine-Tuning via Sparsity Evolution",
+        "authors": "Xiao, Ansell, Wu, et al. — TU Eindhoven, Cambridge, Twente, Surrey, Tübingen AI Center",
+        "category": "Sparse Fine-Tuning",
+        "venue": "Preprint",
+        "date": "2026",
+        "url": "https://arxiv.org/abs/2505.24037",
+        "abstract": "SEFT lets sparse LLMs reallocate and reactivate pruned weights during fine-tuning, adapting the sparse topology itself to the downstream task — outperforms LoRA-style PEFT baselines on LLaMA, DeepSeek, and Mistral while preserving sparsity's memory/time efficiency.",
+        "accentColor": "#facc15",
+        "filterGroup": "ai"
+      }
+    ]
   },
   "writing": {
     "heading": "Writing",

@@ -21,6 +21,7 @@ const HTML_FILE = path.join(ROOT, "index.html");
 // Any extra keys found in the JSON are appended after these, so nothing is lost.
 const SECTION_ORDER = [
   "meta",
+  "skills",
   "hero",
   "experience",
   "projects",
@@ -100,11 +101,8 @@ function initialsOf(name) {
 function faviconHref(initials) {
   const svg =
     `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>` +
-    `<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>` +
-    `<stop offset='0' stop-color='#a78bfa'/><stop offset='1' stop-color='#22d3ee'/>` +
-    `</linearGradient></defs>` +
-    `<rect width='64' height='64' rx='14' fill='#090912'/>` +
-    `<text x='32' y='43' font-family='Arial,sans-serif' font-size='26' font-weight='700' fill='url(#g)' text-anchor='middle'>${initials}</text>` +
+    `<rect width='64' height='64' rx='10' fill='#0a0d10'/>` +
+    `<text x='32' y='43' font-family='monospace' font-size='24' font-weight='700' fill='#ffb454' text-anchor='middle'>${initials}</text>` +
     `</svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }

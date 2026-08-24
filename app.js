@@ -110,7 +110,7 @@
 
   function renderHero(cfg) {
     const hero = cfg.hero;
-    $(".hero__name").innerHTML = esc(hero.name);
+    $(".hero__name-text").innerHTML = esc(hero.name);
     $(".hero__subtitle").textContent = hero.subtitle;
     $(".hero__bio").textContent = hero.bio;
 
@@ -133,7 +133,7 @@
 
   function renderExperience(cfg) {
     const section = $("#experience");
-    $(".section__index", section).textContent = "01";
+    $(".section__index", section).textContent = "~/experience $ log --since=2024";
     $(".section__title", section).textContent = cfg.experience?.heading || "Experience";
     $(".section__desc", section).textContent = "";
 
@@ -147,7 +147,7 @@
               <h3 class="timeline__role">${esc(job.role)}</h3>
               ${job.current ? '<span class="badge-current">Current</span>' : ""}
             </div>
-            <p class="timeline__company" style="color:var(--section-accent)">${esc(job.company)}</p>
+            <p class="timeline__company">${esc(job.company)}</p>
             <p class="timeline__meta">
               <span>${ICONS.calendar.replace("<svg ", '<svg width="13" height="13" ')}${esc(job.period)}</span>
               <span>${ICONS.pin.replace("<svg ", '<svg width="13" height="13" ')}${esc(job.location)}</span>
@@ -168,16 +168,18 @@
       ? `<a class="card__link" href="${esc(p.link)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${esc(p.name)}">${ICONS.external}</a>`
       : "";
     const venue = kind === "paper" ? `<span class="card__venue">${esc(p.venue)} · ${esc(p.date)}</span>` : "";
+    const authors = kind === "paper" && p.authors ? `<p class="card__authors">${esc(p.authors)}</p>` : "";
     return `
-      <article class="card glass${kind === "paper" ? " card--paper" : ""}" style="--accent:${esc(p.accentColor || "#a78bfa")}" data-group="${esc(p.filterGroup || "")}">
+      <article class="card glass${kind === "paper" ? " card--paper" : ""}" style="--accent:${esc(p.accentColor || "#ffb454")}" data-group="${esc(p.filterGroup || "")}">
         <div class="card__top">
           <span class="card__icon">${kind === "paper" ? ICONS.paper : icon(iconName)}</span>
           ${link}
         </div>
         ${venue}
         <div>
-          <p class="card__category">${esc(p.category || (kind === "paper" ? "Research" : "Project"))}</p>
+          <p class="card__category">${esc(p.category || (kind === "paper" ? "Paper" : "Project"))}</p>
           <h3 class="card__name">${esc(p.name)}</h3>
+          ${authors}
         </div>
         <p class="card__desc clamped">${esc(p.description || p.abstract || "")}</p>
         <button class="card__expand" type="button" hidden data-more="Read more" data-less="Show less">Read more</button>
@@ -212,7 +214,7 @@
   function renderProjects(cfg) {
     const section = $("#projects");
     const projects = cfg.projects || [];
-    $(".section__index", section).textContent = "02";
+    $(".section__index", section).textContent = "~/projects $ ls -la";
     $(".section__title", section).textContent = cfg.projectsHeading || "Projects";
     $(".section__desc", section).textContent =
       cfg.projectsDescription || "Things I have designed, built, and shipped.";
@@ -270,7 +272,7 @@
       return;
     }
     section.hidden = false;
-    $(".section__index", section).textContent = "03";
+    $(".section__index", section).textContent = "~/reading $ cat notes.md";
     $(".section__title", section).textContent = cfg.research.heading || "Research";
     $(".section__desc", section).textContent = cfg.research.description || "";
     const grid = $("#research-grid");
@@ -278,10 +280,10 @@
     wireCardExtras(grid);
   }
 
-  function renderWriting(cfg, startIndex) {
+  function renderWriting(cfg) {
     const section = $("#writing");
     const w = cfg.writing || {};
-    $(".section__index", section).textContent = String(startIndex).padStart(2, "0");
+    $(".section__index", section).textContent = "~/writing $ tail -f blog.log";
     $(".section__title", section).textContent = w.heading || "Writing";
     $(".section__desc", section).textContent = w.description || "";
 
@@ -371,18 +373,19 @@
     document.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
   }
 
-  function initNeuralCanvas() {
-    const canvas = $("#neural-bg");
+  // Quiet ambient background: sparse ticks that flicker on and fade, like
+  // distant log lines completing. No connecting lines, no mouse interaction —
+  // deliberately calmer than a "neural network" dot-graph.
+  function initAmbient() {
+    const canvas = $("#ambient-bg");
     if (!canvas || reducedMotion) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const LINK_DIST = 150;
-    const AREA_PER_NODE = 22000;
-    let nodes = [];
+    const CELL = 64;
+    let blips = [];
     let raf = null;
     let running = true;
-    const mouse = { x: -9999, y: -9999 };
 
     function resize() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -390,14 +393,15 @@
       canvas.height = Math.floor(innerHeight * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const count = Math.min(90, Math.max(28, Math.round((innerWidth * innerHeight) / AREA_PER_NODE)));
-      nodes = Array.from({ length: count }, () => ({
-        x: Math.random() * innerWidth,
-        y: Math.random() * innerHeight,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: (Math.random() - 0.5) * 0.35,
-        r: 1.2 + Math.random() * 1.6,
-        hue: Math.random(),
+      const cols = Math.max(1, Math.ceil(innerWidth / CELL));
+      const rows = Math.max(1, Math.ceil(innerHeight / CELL));
+      const count = Math.min(46, Math.max(14, Math.round((cols * rows) / 9)));
+      blips = Array.from({ length: count }, () => ({
+        x: Math.floor(Math.random() * cols) * CELL + CELL / 2,
+        y: Math.floor(Math.random() * rows) * CELL + CELL / 2,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.4 + Math.random() * 0.5,
+        mint: Math.random() < 0.18,
       }));
     }
 
@@ -405,62 +409,17 @@
       if (!running) return;
       ctx.clearRect(0, 0, innerWidth, innerHeight);
 
-      for (const n of nodes) {
-        n.x += n.vx;
-        n.y += n.vy;
-        const dx = n.x - mouse.x;
-        const dy = n.y - mouse.y;
-        const md = Math.hypot(dx, dy);
-        if (md < 130 && md > 0.01) {
-          n.x += (dx / md) * 0.35;
-          n.y += (dy / md) * 0.35;
-        }
-        if (n.x < -20) n.x = innerWidth + 20;
-        if (n.x > innerWidth + 20) n.x = -20;
-        if (n.y < -20) n.y = innerHeight + 20;
-        if (n.y > innerHeight + 20) n.y = -20;
-      }
-
-      ctx.lineWidth = 1;
-      for (let i = 0; i < nodes.length; i++) {
-        const a = nodes[i];
-        for (let j = i + 1; j < nodes.length; j++) {
-          const b = nodes[j];
-          const d = Math.hypot(a.x - b.x, a.y - b.y);
-          if (d < LINK_DIST) {
-            const alpha = (1 - d / LINK_DIST) * 0.22;
-            ctx.strokeStyle = `rgba(139, 148, 250, ${alpha.toFixed(3)})`;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      for (const n of nodes) {
-        const mix = n.hue;
-        const cr = Math.round(167 + (34 - 167) * mix);
-        const cg = Math.round(139 + (211 - 139) * mix);
-        const cb = Math.round(250 + (238 - 250) * mix);
-        const twinkle = 0.55 + 0.45 * Math.sin(t / 900 + n.x);
-        ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${(0.5 * twinkle).toFixed(3)})`;
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx.fill();
+      for (const b of blips) {
+        const s = Math.sin((t / 1000) * b.speed + b.phase);
+        const a = Math.max(0, s) * 0.5;
+        if (a < 0.03) continue;
+        ctx.fillStyle = b.mint ? `rgba(110, 231, 183, ${a.toFixed(3)})` : `rgba(255, 180, 84, ${a.toFixed(3)})`;
+        ctx.fillRect(b.x - 1.5, b.y - 1.5, 3, 3);
       }
       raf = requestAnimationFrame(frame);
     }
 
     window.addEventListener("resize", resize, { passive: true });
-    window.addEventListener(
-      "pointermove",
-      (e) => {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-      },
-      { passive: true }
-    );
     document.addEventListener("visibilitychange", () => {
       running = !document.hidden;
       if (running && raf === null) raf = requestAnimationFrame(frame);
@@ -472,6 +431,29 @@
 
     resize();
     raf = requestAnimationFrame(frame);
+  }
+
+  // Hero companion visual: two rows of real skill tags auto-scrolling in
+  // opposite directions (pauses on hover). Content is duplicated per row so
+  // the CSS animation loops seamlessly at -50% translation. Under
+  // prefers-reduced-motion the global animation-duration override collapses
+  // this to a static row (the duplicate content makes the "end" state look
+  // identical to the start), so no separate static path is needed.
+  function initSkillMarquee(cfg) {
+    const wrap = $("#skills-rows");
+    const rows = cfg.skills?.rows || [];
+    if (!wrap || !rows.length) return;
+
+    const label = $("#skills-label");
+    if (label) label.textContent = cfg.skills?.label || "";
+
+    wrap.innerHTML = rows
+      .map((items) => {
+        const pills = items.map((s) => `<span class="skill-pill">${esc(s)}</span>`).join("");
+        // duplicated so the -50% translate loops seamlessly
+        return `<div class="skillmarquee__row">${pills + pills}</div>`;
+      })
+      .join("");
   }
 
   function boot() {
@@ -488,17 +470,18 @@
     const researchVisible = !$("#research").hidden;
 
     const navSections = [{ id: "experience", label: "Experience" }, { id: "projects", label: "Projects" }];
-    if (researchVisible) navSections.push({ id: "research", label: "Research" });
+    if (researchVisible) navSections.push({ id: "research", label: CONFIG.research?.heading || "Research" });
     navSections.push({ id: "writing", label: "Writing" }, { id: "contact", label: "Contact" });
     initNav(navSections);
 
-    renderWriting(CONFIG, researchVisible ? 4 : 3);
+    renderWriting(CONFIG);
     renderContact(CONFIG);
 
     $("#footer-text").textContent = CONFIG.footer?.text || "";
 
     initReveals();
-    initNeuralCanvas();
+    initAmbient();
+    initSkillMarquee(CONFIG);
   }
 
   if (document.readyState === "loading") {
