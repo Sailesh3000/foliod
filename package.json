@@ -1,0 +1,16 @@
+{
+  "name": "portfolio-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Config-driven static portfolio + local Ollama agent that auto-adds new GitHub repos and Medium posts, then pushes to trigger a Vercel/Netlify redeploy.",
+  "type": "commonjs",
+  "scripts": {
+    "generate": "node scripts/generate-config.js",
+    "poll": "node agent/poll.js",
+    "poll:dry": "node agent/poll.js --dry-run"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {}
+}

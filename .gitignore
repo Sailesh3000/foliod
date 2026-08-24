@@ -1,0 +1,13 @@
+# secrets / local env
+.env
+
+# logs
+*.log
+
+# dependencies
+node_modules/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
