@@ -146,7 +146,7 @@ async function draftProjectEntry({ repo, readme = "" }, { host, model, accentInd
     category: typeof parsed.category === "string" && parsed.category.trim() ? parsed.category.trim() : "Project",
     description,
     tech,
-    link: repo.url,
+    link: repo.html_url,
     highlight: typeof parsed.highlight === "string" ? parsed.highlight.trim().slice(0, 90) : "",
     accentColor: ACCENT_PALETTE[accentIndex % ACCENT_PALETTE.length],
     icon: "sparkle",
