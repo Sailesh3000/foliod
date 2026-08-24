@@ -161,6 +161,21 @@ const CONFIG = {
     "blogLabel": "Read on Medium",
     "featured": [
       {
+        "title": "Inside MCP: The Architecture Behind the Protocol",
+        "date": "2026",
+        "url": "https://medium.com/@saileshhedu/inside-mcp-the-architecture-behind-the-protocol-cc9248d93605"
+      },
+      {
+        "title": "Why APIs Weren’t Built for This: The Missing Layer Between Models and Tools",
+        "date": "2026",
+        "url": "https://medium.com/@saileshhedu/why-apis-werent-built-for-this-the-missing-layer-between-models-and-tools-25df5e4bc885"
+      },
+      {
+        "title": "The Integration Tax: Why the AI Industry Quietly Built a New Protocol",
+        "date": "2026",
+        "url": "https://medium.com/@saileshhedu/the-integration-tax-why-the-ai-industry-quietly-built-a-new-protocol-67caa7a0a895"
+      },
+      {
         "title": "Building Memory-Powered AI Agents with Strands, Mem0, and Qdrant",
         "date": "2026",
         "url": "https://medium.com/@saileshhedu/building-memory-powered-ai-agents-with-strands-mem0-and-qdrant-b524ece548c8"

@@ -13,10 +13,26 @@
       "phone": "+91 9121450673"
     },
     "socials": [
-      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/chandra-sailesh-b8584b24b/", "icon": "linkedin" },
-      { "label": "GitHub", "url": "https://github.com/Sailesh3000", "icon": "github" },
-      { "label": "LeetCode", "url": "https://leetcode.com/u/chandrasailesh30/", "icon": "leetcode" },
-      { "label": "Medium", "url": "https://medium.com/@saileshhedu", "icon": "medium" }
+      {
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/chandra-sailesh-b8584b24b/",
+        "icon": "linkedin"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/Sailesh3000",
+        "icon": "github"
+      },
+      {
+        "label": "LeetCode",
+        "url": "https://leetcode.com/u/chandrasailesh30/",
+        "icon": "leetcode"
+      },
+      {
+        "label": "Medium",
+        "url": "https://medium.com/@saileshhedu",
+        "icon": "medium"
+      }
     ]
   },
   "experience": [
@@ -142,6 +158,21 @@
     "blogUrl": "https://medium.com/@saileshhedu",
     "blogLabel": "Read on Medium",
     "featured": [
+      {
+        "title": "Inside MCP: The Architecture Behind the Protocol",
+        "date": "2026",
+        "url": "https://medium.com/@saileshhedu/inside-mcp-the-architecture-behind-the-protocol-cc9248d93605"
+      },
+      {
+        "title": "Why APIs Weren’t Built for This: The Missing Layer Between Models and Tools",
+        "date": "2026",
+        "url": "https://medium.com/@saileshhedu/why-apis-werent-built-for-this-the-missing-layer-between-models-and-tools-25df5e4bc885"
+      },
+      {
+        "title": "The Integration Tax: Why the AI Industry Quietly Built a New Protocol",
+        "date": "2026",
+        "url": "https://medium.com/@saileshhedu/the-integration-tax-why-the-ai-industry-quietly-built-a-new-protocol-67caa7a0a895"
+      },
       {
         "title": "Building Memory-Powered AI Agents with Strands, Mem0, and Qdrant",
         "date": "2026",
