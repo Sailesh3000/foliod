@@ -682,11 +682,16 @@ body::before {
   margin-bottom: 1.1rem;
 }
 
+.timeline__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .timeline__meta svg {
   width: 13px;
   height: 13px;
-  vertical-align: -2px;
-  margin-right: 5px;
+  flex-shrink: 0;
 }
 
 .badge-current {
