@@ -101,6 +101,45 @@ const CONFIG = {
   ],
   "projects": [
     {
+      "name": "pinch",
+      "category": "Mobile / AI",
+      "description": "Privacy-first Android expense tracker using on-device AI to extract transactions from bank/UPI notifications without data leakage. Implements a tiered LLM pipeline for deterministic financial insights with no cloud dependency.",
+      "tech": [
+        "Kotlin",
+        "Jetpack Compose",
+        "NotificationListenerService",
+        "on-device LLMs",
+        "SQLite",
+        "WorkManager",
+        "MediaPipe",
+        "Regex"
+      ],
+      "link": "https://api.github.com/repos/Sailesh3000/pinch",
+      "highlight": "On-device AI processes payments without data leakage",
+      "accentColor": "#a78bfa",
+      "icon": "sparkle",
+      "filterGroup": "ai"
+    },
+    {
+      "name": "Snag",
+      "category": "AI Tools / Web Extensions",
+      "description": "AI-powered job application assistant with Chrome extension and FastAPI backend that auto-fills job forms using LLM-generated answers. Combines DOM extraction, semantic memory, and real-time WebSocket communication for personalized application support.",
+      "tech": [
+        "TypeScript",
+        "FastAPI",
+        "WebSocket",
+        "SQLite",
+        "LLM Providers",
+        "React",
+        "Mermaid"
+      ],
+      "link": "https://api.github.com/repos/Sailesh3000/Snag",
+      "highlight": "Autofills job forms with AI-generated answers using local or cloud LLMs",
+      "accentColor": "#34d399",
+      "icon": "sparkle",
+      "filterGroup": "ai"
+    },
+    {
       "name": "Knowledge Detective",
       "category": "Semantic Graph & RAG",
       "description": "Engineered a hybrid semantic graph engine for enterprise memory that unifies cross-platform communication—connecting GitHub commits, Gmail threads, and Google Calendar meetings into a real-time organizational brain. Designed a dual-engine architecture combining Qdrant (high-speed semantic vector search) with Neo4j (graph-based relationship mapping) to deliver fully verified, citation-backed answers. Developed key innovations including graph-level dynamic identity resolution (aliasing handles and emails to canonical person nodes), multi-stage LLM-based query planning, and gap detection for unclosed decision loops. Implemented with a multi-agent FastAPI backend and React dashboard, optimized for AMD ROCm GPU acceleration.",
