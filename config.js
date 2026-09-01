@@ -217,6 +217,11 @@ const CONFIG = {
     "blogLabel": "Read on Medium",
     "featured": [
       {
+        "title": "Building With MCP: Workflow, Code, Migration, and Where It Doesn’t Fit",
+        "date": "2026",
+        "url": "https://medium.com/@saileshhedu/building-with-mcp-workflow-code-migration-and-where-it-doesnt-fit-2ff17156c014"
+      },
+      {
         "title": "Inside MCP: The Architecture Behind the Protocol",
         "date": "2026",
         "url": "https://medium.com/@saileshhedu/inside-mcp-the-architecture-behind-the-protocol-cc9248d93605"

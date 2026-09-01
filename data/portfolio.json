@@ -7,10 +7,34 @@
   "skills": {
     "label": "// stack",
     "rows": [
-      ["Python", "React.js", "FastAPI", "TypeScript", "Node.js"],
-      ["RAG", "LLMs", "Agentic AI", "LangGraph", "Strands"],
-      ["Qdrant", "TensorFlow", "Docker", "AWS", "MongoDB"],
-      ["NLP", "mem0", "Scikit-learn", "FastMCP", "Git"]
+      [
+        "Python",
+        "React.js",
+        "FastAPI",
+        "TypeScript",
+        "Node.js"
+      ],
+      [
+        "RAG",
+        "LLMs",
+        "Agentic AI",
+        "LangGraph",
+        "Strands"
+      ],
+      [
+        "Qdrant",
+        "TensorFlow",
+        "Docker",
+        "AWS",
+        "MongoDB"
+      ],
+      [
+        "NLP",
+        "mem0",
+        "Scikit-learn",
+        "FastMCP",
+        "Git"
+      ]
     ]
   },
   "hero": {
@@ -190,6 +214,11 @@
     "blogUrl": "https://medium.com/@saileshhedu",
     "blogLabel": "Read on Medium",
     "featured": [
+      {
+        "title": "Building With MCP: Workflow, Code, Migration, and Where It Doesn’t Fit",
+        "date": "2026",
+        "url": "https://medium.com/@saileshhedu/building-with-mcp-workflow-code-migration-and-where-it-doesnt-fit-2ff17156c014"
+      },
       {
         "title": "Inside MCP: The Architecture Behind the Protocol",
         "date": "2026",
